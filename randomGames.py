@@ -10,7 +10,7 @@ import numpy as np
 import copy
 
 
-# %% Let's play some random games of connect-4
+# Let's play some random games of connect-4
 
 # 6 rows and 7 colums
 # board is a matrix of zeros.
@@ -35,7 +35,7 @@ def makeRandomPlay(currentState, intOfTurn):
     rowToPlay = min(np.where(currentState[:,colToPlay]==0)[0])
     out = copy.deepcopy(currentState)
     out[rowToPlay, colToPlay] = intOfTurn
-    print out
+    # print out
     return out
 
 def whereToRandomlyPlay(currentState):
@@ -67,24 +67,24 @@ def fourInARow(npArrayVector, intOfTurn):
 # note: we have access to the row, col just played...
 def checkForWinner(currentState, rowPlayed, colPlayed, intOfTurn):
     # check for col win
-    print("col")
+    #print("col")
     if rowPlayed >= 3:
         if np.all(currentState[rowPlayed-3:rowPlayed+1,colPlayed] == intOfTurn):
             return (True, intOfTurn)
     # check for row win
-    print("row")
+    #print("row")
     if fourInARow(currentState[rowPlayed,:],intOfTurn):
         return(True, intOfTurn)
     # check for diagonal wins:
     # first, the easy one (down/left, up/right)    
-    print("dl")
+    #print("dl")
     dl = []
     for i in np.arange(1,7):
         if rowPlayed-i >= 0 and colPlayed - i >= 0:
             dl.append(currentState[rowPlayed-i, colPlayed-i])
     vec = list(reversed(dl))
     vec.append(intOfTurn * 1.0)
-    print("ur")
+    #print("ur")
     up = []
     for i in np.arange(1,7):
         if rowPlayed+i <= 5 and colPlayed + i <= 6:
@@ -93,14 +93,14 @@ def checkForWinner(currentState, rowPlayed, colPlayed, intOfTurn):
     if fourInARow(vec, intOfTurn):
         return(True, intOfTurn)
     # now the up/left, down/right diag:
-    print("ul")
+    #print("ul")
     ul = []
     for i in np.arange(1,7):
         if rowPlayed+i <= 5 and colPlayed - i >= 0:
             ul.append(currentState[rowPlayed+i, colPlayed-i])
     vec2 = list(reversed(ul))
     vec2.append(intOfTurn * 1.0)
-    print("dr")
+    #print("dr")
     for i in np.arange(1,7):
         if rowPlayed-i <= 0 and colPlayed +i <= 6:
             vec2.append(currentState[rowPlayed-i, colPlayed+i])
@@ -108,8 +108,8 @@ def checkForWinner(currentState, rowPlayed, colPlayed, intOfTurn):
         return(True, intOfTurn)
     return (False, intOfTurn)
 
-tg = g[0][21]
-checkForWinner(tg, 0, 2, 1)
+#tg = g[0][21]
+#checkForWinner(tg, 0, 2, 1)
 
 # checkForWinner casually passes spot testing.  Ought to write a proper unit test for this... TODO
 
@@ -162,7 +162,38 @@ def backMapReward(intOfWinner, nSteps):
         weights = [-1 * x for x in weights]
     return(weights)
 
+# this function takes in a gameStateList and intOfWinner (a played game)
+# returns tuple of list of tuples (game state, score), and intOfWinner
 def addRewardToGameStates(gameStateList, intOfWinner):
+    outList = []
+    gsl_len = len(gameStateList)
+    for i in range(len(gameStateList)):
+        value = 0.9 ** (gsl_len - i - 1) * intOfWinner
+        f = (gameStateList[i], value)
+        outList.append(f)
+    return((outList, intOfWinner))
+    
+scored = addRewardToGameStates(g[0], g[1])   
+
+## Ok, now to play a bunch of random games
+## and add the rewards to them
+## We don't need to keep the individual games together
+## ...just need a game state and score pair
+## SO, List of gameStateMatrix, score
+
+def prepGames(nGames):
+    dataForModel = []
+    for i in range(nGames):
+        rg = randomGame()
+        if rg[1] != 0: # if there wasn't a tie...
+            withRewards = addRewardToGameStates(rg[0], rg[1])
+            for k in range(len(withRewards[0])):
+                dataForModel.append(withRewards[0][k])
+    return(dataForModel)
+# this function returns a list of tuples of gameStateMatrix, back-stepped score
+# that could go right into a Keras model with a little munging
+
+
     
 
 
