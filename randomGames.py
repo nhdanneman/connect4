@@ -194,8 +194,8 @@ def prepGames(nGames):
 # that could go right into a Keras model with a little munging
 
 
-    
-
+# rand_games = prepGames(100)  
+# rand_games[1]
 
 
 
