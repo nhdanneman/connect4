@@ -194,22 +194,40 @@ def prepGames(nGames):
 # that could go right into a Keras model with a little munging
 
 
-rand_games = prepGames(2000)  
+rand_games = prepGames(5000)  
 rand_games[1]
 
 len(rand_games)
 
 
-gsms = [i[0] for i in rand_games]
-backmapped_scores = [i[1] for i in rand_games]
+#gsms = [i[0] for i in rand_games]
+#backmapped_scores = [i[1] for i in rand_games]
+
+# only for game states closer to victory...
+gsms = [i[0] for i in rand_games if abs(i[1]) > .8]
+backmapped_scores = [i[1] for i in rand_games if abs(i[1]) > .8]
 
 
-gsms_train = gsms[0:20000]
-backmapped_scores_train = backmapped_scores[0:20000]
+gsms_train = gsms[0:10000]
+backmapped_scores_train = backmapped_scores[0:10000]
 
-gsms_test = gsms[20001:]
-backmapped_scores_test = backmapped_scores[20001:]
+gsms_test = gsms[10001:]
+backmapped_scores_test = backmapped_scores[10001:]
 
+
+#%% FLAT SETUP
+
+x_train = [i.flatten() for i in gsms_train]
+x_train = np.array(x_train)
+y_train = np.array(backmapped_scores_train)
+
+x_test = [i.flatten() for i in gsms_test]
+x_test = np.array(x_test)
+y_test = np.array(backmapped_scores_test)
+
+
+
+#%% CONV SETUP
 
 x_train = np.array(gsms_train)
 x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], x_train.shape[2], 1)
