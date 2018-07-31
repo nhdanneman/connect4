@@ -12,50 +12,64 @@ Created on Thu Jul  5 18:08:09 2018
 
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 
 from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers.convolutional import Conv2D, MaxPooling2D, Dropout
+from keras.layers import Dense, Flatten
+from keras.layers.convolutional import Conv2D, MaxPooling2D
+from keras.layers import Dropout
+import keras
 
 
-
+batch_size=2000
+epochs=130
 
 
 # reference model (very simple):
 # https://github.com/keras-team/keras/blob/master/examples/mnist_cnn.py
 
 # TODO: is this rows, cols, channels?  Or channels, rows, cols?
-input_shape = (1, 6, 7)  # (1, 6, 7)  
+input_shape = (6, 7, 1)  # (1, 6, 7)  
 
 model = Sequential()
 # TODO: how many filters?  And what size kernel?
-model.add(Conv2D(32, kernel_size=(3, 3),
+model.add(Conv2D(32, kernel_size=(5, 5),
                  activation='relu',
                  input_shape=input_shape))
-# TODO: remember what max pooling is, and think about how it should be applied here
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+model.add(MaxPooling2D(pool_size=(2,2)))  # defaults to stride=(1,1)
+
+
 model.add(Flatten())
-model.add(Dense(10, activation='relu'))
+model.add(Dense(30, activation='relu'))
 model.add(Dropout(0.5))
 # TODO: this is a stupid linear output function for a truncated DV!
+# TODO: alter the backmapping to (0,1) and use a sigmoid output function!
 model.add(Dense(1))  
 
-model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer=keras.optimizers.Adadelta(),
-              metrics=['accuracy'])
+model.summary()
+
+model.compile(loss=keras.losses.mean_squared_error,
+              optimizer=keras.optimizers.rmsprop(),
+              metrics=['mae'])
 
 model.fit(x_train, y_train,
           batch_size=batch_size,
           epochs=epochs,
           verbose=1,
           validation_data=(x_test, y_test))
-score = model.evaluate(x_test, y_test, verbose=0)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
 
-    
+# WITHIN SAMPLE (better be good!)
+y_hat = model.predict(x_train)
+to_samp = np.random.choice(len(y_train), size=200, replace=False)
+plt.plot(y_train[to_samp],y_hat[to_samp], 'bo')
 
+# OUT OF SAMPLE
+y_hat = model.predict(x_test)
+# sample and plot some predictions of particular game states:
+to_samp = np.random.choice(len(y_test), size=200, replace=False)
+plt.plot(y_test[to_samp],y_hat[to_samp], 'bo')
+#plt.plot(y_test,y_hat, 'bo')
 
 
 #def generator_model():

@@ -131,7 +131,7 @@ def randomGame():
         # make the play
         nextState = copy.deepcopy(allGameStates[i])
         nextState[nextRow, nextCol] = whoseTurn
-        print(nextState)
+        # print(nextState)
         # add this move to the list of game states
         allGameStates.append(nextState)
         # check for winner (after 7 turns!)
@@ -194,22 +194,36 @@ def prepGames(nGames):
 # that could go right into a Keras model with a little munging
 
 
-# rand_games = prepGames(100)  
-# rand_games[1]
+rand_games = prepGames(2000)  
+rand_games[1]
+
+len(rand_games)
 
 
+gsms = [i[0] for i in rand_games]
+backmapped_scores = [i[1] for i in rand_games]
 
 
+gsms_train = gsms[0:20000]
+backmapped_scores_train = backmapped_scores[0:20000]
+
+gsms_test = gsms[20001:]
+backmapped_scores_test = backmapped_scores[20001:]
 
 
+x_train = np.array(gsms_train)
+x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], x_train.shape[2], 1)
+y_train = np.array(backmapped_scores_train)
+
+x_test = np.array(gsms_test)
+x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], x_test.shape[2], 1)
+y_test = np.array(backmapped_scores_test)
 
 
+# 
 
-
-
-
-
-
+#x_train = x_train[:, :, :, None]
+#x_test = x_test[:,:,:,None]
 
 
 
